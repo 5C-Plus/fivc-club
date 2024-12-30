@@ -1,0 +1,14 @@
+[
+  {
+    "model": "club_accounts.Account",
+    "pk": 100,
+    "fields": {
+      "uuid": "97ecc0aa-c6bc-11ef-a407-ba4b1618bd02",
+      "club": 100,
+      "name": "Default",
+      "description": "Default Account for Neo Club",
+      "created_time": "2024-12-29T15:11:11.771377Z",
+      "modified_time": "2024-12-29T15:11:11.771377Z"
+    }
+  }
+]

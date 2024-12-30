@@ -1,0 +1,24 @@
+[
+  {
+    "model": "clubs.Club",
+    "pk": 100,
+    "fields": {
+      "uuid": "23aa0182-c5f7-11ef-8557-ba4b1618bd02",
+      "name": "Test Club Neo",
+      "intro": "Neo Club",
+      "created_time": "2024-12-29T15:11:11.771377Z",
+      "modified_time": "2024-12-29T15:11:11.771377Z"
+    }
+  },
+  {
+    "model": "clubs.Club",
+    "pk": 101,
+    "fields": {
+      "uuid": "23aa0182-c5f7-11ef-8557-ba4b1618bd03",
+      "name": "Test Club 2nd",
+      "intro": "2nd Club",
+      "created_time": "2024-12-29T15:11:11.771377Z",
+      "modified_time": "2024-12-29T15:11:11.771377Z"
+    }
+  }
+]

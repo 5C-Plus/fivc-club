@@ -1,0 +1,28 @@
+# celery~=5.0
+# coreapi==2.3.3
+# cryptography==3.4.7
+Django~=4.2.0
+djangorestframework~=3.0
+# djangorestframework-camel-case==1.4.2
+django-cas-ng~=5.0.0
+django-cleanup~=9.0
+# django-constance==2.8.0
+django-cors-headers~=4.0
+django-filter~=24.0
+# django-picklefield==3.0.1
+# django-redis==5.0.0
+# drf-nested-routers==0.93.3
+drf-yasg~=1.21.0
+fivc~=0.0
+# gevent==23.7.0
+# gunicorn==20.1.0
+# jinja2==3.0.3
+# openpyxl==3.0.9
+Pillow~=11.0.0
+# PyMySQL==1.0.2
+# python-dateutil==2.8.1
+PyYaml~=6.0
+# redis==3.5.3
+requests~=2.0
+urllib3~=2.0
+# xmltodict==0.12.0
