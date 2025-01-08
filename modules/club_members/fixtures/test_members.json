@@ -1,0 +1,24 @@
+[
+  {
+    "model": "club_members.Attendee",
+    "pk": 100,
+    "fields": {
+      "uuid": "97ecc0aa-c6bc-11ef-a407-ba4b1618bd02",
+      "name": "Charlie ZHANG",
+      "intro": "Developer of this app",
+      "created_time": "2024-12-29T15:11:11.771377Z",
+      "modified_time": "2024-12-29T15:11:11.771377Z"
+    }
+  },
+  {
+    "model": "club_members.Attendee",
+    "pk": 101,
+    "fields": {
+      "uuid": "2452b778-cd77-11ef-b9f8-ba4b1618bd02",
+      "name": "Michael ZHENG",
+      "intro": "PM of this app",
+      "created_time": "2024-12-29T15:11:11.771377Z",
+      "modified_time": "2024-12-29T15:11:11.771377Z"
+    }
+  }
+]

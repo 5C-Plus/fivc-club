@@ -1,3 +1,4 @@
+from functools import cached_property
 from uuid import uuid1
 
 from django.db import models
@@ -8,6 +9,12 @@ from libs.models.mixins import (
     TrackableModelMixin,
     VersionedModelMixin,
 )
+
+
+# class AccountError(Exception):
+#     """
+#     basic account error
+#     """
 
 
 class Account(
@@ -36,11 +43,20 @@ class Account(
         blank=True,
         default='',
     )
+    is_sealed = models.BooleanField(
+        default=False,
+    )
 
     class Meta:
         unique_together = [
             ('club', 'name'),
         ]
+
+    @cached_property
+    def balance(self):
+        return self.transactions.aggregate(
+            balance=models.Sum('transact_amount')
+        )['balance'] or 0.0
 
 
 class TransactionCategory(
@@ -104,7 +120,9 @@ class Transaction(
     transact_time = models.DateTimeField()
     # account info --------------------------
     # balance after transaction
-    account_balance = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-    )
+    # account_balance = models.DecimalField(
+    #     decimal_places=2,
+    #     max_digits=12,
+    #     null=True,
+    #     default=None,
+    # )

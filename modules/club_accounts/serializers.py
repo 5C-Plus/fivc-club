@@ -1,5 +1,8 @@
 from django.apps import apps
-from rest_framework import serializers
+from rest_framework import (
+    exceptions,
+    serializers,
+)
 from libs.serializers import (
     TrackableModelSerializer,
 )
@@ -20,6 +23,7 @@ class AccountSerializer(TrackableModelSerializer):
         source='club.name',
         default='',
     )
+    balance = serializers.SerializerMethodField()
 
     class Meta:
         model = Account
@@ -31,17 +35,28 @@ class AccountSerializer(TrackableModelSerializer):
             'modified_time',
 
             'club_name',
+            'balance',
         )
         fields = (
             'club',
             'name',
             'description',
+            'is_sealed',
             *read_only_fields,
         )
 
+    @staticmethod
+    def get_balance(instance):
+        return getattr(instance, 'balance') or 0.0
+
     def update(self, instance, validated_data):
+        if instance.is_sealed:
+            raise exceptions.PermissionDenied(
+                'account is sealed')
+
         # can not change club
         validated_data.pop('club', None)
+
         return super().update(instance, validated_data)
 
 
@@ -93,7 +108,7 @@ class TransactionSerializer(TrackableModelSerializer):
 
             'category_name',
             'account_name',
-            'account_balance',
+            # 'account_balance',
         )
         fields = (
             'category',
@@ -107,6 +122,11 @@ class TransactionSerializer(TrackableModelSerializer):
         )
 
     def update(self, instance, validated_data):
+        if instance.account.is_sealed:
+            raise exceptions.PermissionDenied(
+                'account is sealed')
+
         # can not change account
         validated_data.pop('account', None)
+
         return super().update(instance, validated_data)

@@ -8,7 +8,7 @@ from libs.models.mixins import (
 )
 
 
-class Visitor(
+class Attendee(
     TrackableModelMixin,
     VersionedModelMixin,
     models.Model,
@@ -38,13 +38,18 @@ class Visitor(
         null=True,
         default=None,
     )
+    # any description to help VPM
+    # description = models.TextField(
+    #     blank=True,
+    #     default='',
+    # )
     birthday = models.DateField(
         null=True,
         default=None,
     )
 
 
-class Member(
+class Membership(
     TrackableModelMixin,
     VersionedModelMixin,
     models.Model,
@@ -62,20 +67,36 @@ class Member(
         on_delete=models.PROTECT,
         db_constraint=False,
     )
-    visitor = models.ForeignKey(
-        Visitor,
+    attendee = models.ForeignKey(
+        Attendee,
         related_name='members',
         on_delete=models.PROTECT,
         db_constraint=False,
     )
-    officer = models.TextField(
-        max_length=64,
+    type_enum = {
+        'President': 'President',
+        'VPE': 'Vice President Education',
+        'VPM': 'Vice President Membership',
+        'VPPR': 'Vice President Public Relationship',
+        'Secretary': 'Secretary',
+        'Treasurer': 'Treasurer',
+        'SAA': 'Sergeant At Arms',
+        'IPP': 'Immediate Past President',
+        None: 'None Officer',
+    }
+    type = models.CharField(
+        max_length=32,
+        choices=list(type_enum.items()),
+        null=True,
+        default=None,
+    )
+    remark = models.TextField(
         null=True,
         default=None,
     )
 
     class Meta:
         unique_together = [
-            ('club', 'visitor'),
-            ('club', 'officer'),
+            ('club', 'attendee'),
+            ('club', 'type'),
         ]

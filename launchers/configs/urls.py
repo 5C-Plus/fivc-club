@@ -21,9 +21,9 @@ from rest_framework import authentication, permissions
 
 schema_view = get_schema_view(
     openapi.Info(
-        title='Cliche API',
+        title='Fivc Club API',
         default_version='V1',
-        description='Cliche',
+        description='Fivc Club',
     ),
     public=True,
     authentication_classes=[authentication.SessionAuthentication],
@@ -35,5 +35,7 @@ urlpatterns = [
     path('api/admin/', admin.site.urls),
     path('api/drf/', include('rest_framework.urls')),
     path('api/', include('modules.club_accounts.urls')),
+    path('api/', include('modules.club_members.urls')),
+    path('api/', include('modules.club_meetings.urls')),
     path('api/', include('modules.clubs.urls')),
 ]

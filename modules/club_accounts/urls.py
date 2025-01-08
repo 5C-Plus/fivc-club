@@ -11,14 +11,14 @@ app_name = 'club_accounts'
 
 router = DefaultRouter()
 router.register(
-    'transactions/categories',
+    'accounts/transactions/categories',
     TransactionCategoryViewSet,
-    basename='categories',
+    basename='account_transaction_categories',
 )
 router.register(
-    'transactions',
+    'accounts/transactions',
     TransactionViewSet,
-    basename='transactions',
+    basename='account_transactions',
 )
 router.register(
     'accounts',

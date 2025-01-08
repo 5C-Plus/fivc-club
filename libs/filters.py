@@ -11,3 +11,12 @@ class NullUUIDField(fields.UUIDField):
 
 class NullUUIDFilter(filters.UUIDFilter):
     field_class = NullUUIDField
+
+
+# class NullCharField(fields.CharField):
+#     def to_python(self, value):
+#         return None if value == 'null' else super().to_python(value)
+#
+#
+# class NullCharFilter(filters.CharFilter):
+#     field_class = NullCharField

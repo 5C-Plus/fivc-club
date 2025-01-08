@@ -48,8 +48,10 @@ INSTALLED_APPS = [
     'drf_yasg',
     'rest_framework',
 
-    'modules.clubs',
     'modules.club_accounts',
+    'modules.club_members',
+    'modules.club_meetings',
+    'modules.clubs',
 ]
 
 MIDDLEWARE = [

@@ -1,3 +1,4 @@
+from django.db import models
 from rest_framework import viewsets
 from libs.permissions import (
     IsAdminOrReadOnly,
@@ -34,6 +35,10 @@ class AccountViewSet(
     permission_classes = (IsAdminOrReadOnly,)
     queryset = Account.objects.select_related(
         'club', 'created_by', 'modified_by',
+    ).annotate(
+        balance=models.Sum(
+            'transactions__transact_amount'
+        )
     ).all()
     serializer_class = AccountSerializer
 

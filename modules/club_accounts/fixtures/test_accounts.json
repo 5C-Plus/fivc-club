@@ -10,5 +10,18 @@
       "created_time": "2024-12-29T15:11:11.771377Z",
       "modified_time": "2024-12-29T15:11:11.771377Z"
     }
+  },
+  {
+    "model": "club_accounts.Transaction",
+    "pk": 100,
+    "fields": {
+      "uuid": "e1fb4bc2-c788-11ef-8097-ba4b1618bd02",
+      "account": 100,
+      "description": "First Income",
+      "transact_amount" : 100.0,
+      "transact_time": "2024-12-29T15:11:11.771377Z",
+      "created_time": "2024-12-29T15:11:11.771377Z",
+      "modified_time": "2024-12-29T15:11:11.771377Z"
+    }
   }
 ]
