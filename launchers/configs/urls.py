@@ -38,4 +38,5 @@ urlpatterns = [
     path('api/', include('modules.club_members.urls')),
     path('api/', include('modules.club_meetings.urls')),
     path('api/', include('modules.clubs.urls')),
+    path('api/', include('modules.users.urls')),
 ]

@@ -2,7 +2,7 @@ from importlib import import_module
 
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
-# from django_cas_ng.utils import get_user_from_session
+from django_cas_ng.utils import get_user_from_session
 from rest_framework import authentication, exceptions
 
 SessionStore = import_module(settings.SESSION_ENGINE).SessionStore

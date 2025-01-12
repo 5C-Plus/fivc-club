@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'modules.club_members',
     'modules.club_meetings',
     'modules.clubs',
+    'modules.users',
 ]
 
 MIDDLEWARE = [
@@ -153,7 +154,7 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'libs.exceptions.exception_handler',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'libs.authentication.BearerAuthentication',
-        'libs.authentication.SessionAuthentication',
+        # 'libs.authentication.SessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'libs.permissions.IsAdminOrReadOnly',
