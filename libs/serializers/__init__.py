@@ -31,7 +31,10 @@ class TrackableCreateModelSerializer(
     def create(self, validated_data):
         req = self.context.get('request')
         req_user = req and req.user
-        req_user = req_user and req_user.is_authenticated or None
+        req_user = (
+            req_user if
+            req_user and req_user.is_authenticated else None
+        )
         validated_data['created_by'] = req_user
         return super().create(validated_data)
 
@@ -47,14 +50,20 @@ class TrackableModelSerializer(
     def create(self, validated_data):
         req = self.context.get('request')
         req_user = req and req.user
-        req_user = req_user and req_user.is_authenticated or None
+        req_user = (
+            req_user if
+            req_user and req_user.is_authenticated else None
+        )
         validated_data['modified_by'] = req_user
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
         req = self.context.get('request')
         req_user = req and req.user
-        req_user = req_user and req_user.is_authenticated or None
+        req_user = (
+            req_user if
+            req_user and req_user.is_authenticated else None
+        )
         validated_data['modified_by'] = req_user
         return super().update(instance, validated_data)
 
