@@ -117,6 +117,9 @@ class Transaction(
         decimal_places=2,
         max_digits=12,
     )
+    transact_audited = models.BooleanField(
+        default=False
+    )
     transact_time = models.DateTimeField()
     # account info --------------------------
     # balance after transaction

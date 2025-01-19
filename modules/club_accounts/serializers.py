@@ -115,6 +115,8 @@ class TransactionSerializer(TrackableModelSerializer):
             'account',
 
             'description',
+
+            'transact_audited',
             'transact_amount',
             'transact_time',
 
@@ -125,6 +127,12 @@ class TransactionSerializer(TrackableModelSerializer):
         if instance.account.is_sealed:
             raise exceptions.PermissionDenied(
                 'account is sealed')
+
+        if instance.transact_audited:
+            # can not change transcat info after being audited
+            validated_data.pop('transact_audited', None)
+            validated_data.pop('transact_amount', None)
+            validated_data.pop('transact_time', None)
 
         # can not change account
         validated_data.pop('account', None)
