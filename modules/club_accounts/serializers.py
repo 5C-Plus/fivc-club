@@ -61,6 +61,15 @@ class AccountSerializer(TrackableModelSerializer):
 
 
 class TransactionCategorySerializer(TrackableModelSerializer):
+    club = serializers.SlugRelatedField(
+        slug_field='uuid',
+        queryset=apps.get_model('clubs.Club').objects.all(),
+    )
+    club_name = serializers.ReadOnlyField(
+        source='club.name',
+        default='',
+    )
+
     class Meta:
         model = TransactionCategory
         read_only_fields = (
@@ -69,12 +78,21 @@ class TransactionCategorySerializer(TrackableModelSerializer):
             'created_time',
             'modified_by',
             'modified_time',
+
+            'club_name',
         )
         fields = (
+            'club',
             'name',
             'description',
             *read_only_fields,
         )
+
+    def update(self, instance, validated_data):
+        # can not change club
+        validated_data.pop('club', None)
+
+        return super().update(instance, validated_data)
 
 
 class TransactionSerializer(TrackableModelSerializer):

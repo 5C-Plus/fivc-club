@@ -1,5 +1,8 @@
 from django.db import models
-from rest_framework import viewsets
+from rest_framework import (
+    exceptions,
+    viewsets,
+)
 from libs.permissions import (
     IsAdminOrReadOnly,
 )
@@ -52,7 +55,7 @@ class TransactionCategoryViewSet(
     lookup_field = 'uuid'
     permission_classes = (IsAdminOrReadOnly,)
     queryset = TransactionCategory.objects.select_related(
-        'created_by', 'modified_by',
+        'club', 'created_by', 'modified_by',
     )
     serializer_class = TransactionCategorySerializer
 
@@ -71,5 +74,12 @@ class TransactionViewSet(
         # 'account__club',
         'created_by',
         'modified_by',
-    )
+    ).order_by('-transact_time')
     serializer_class = TransactionSerializer
+
+    def perform_destroy(self, instance):
+        if instance.account.is_sealed:
+            raise exceptions.PermissionDenied(
+                'not allowed to delete transaction in sealed account')
+
+        return super().perform_destroy(instance)

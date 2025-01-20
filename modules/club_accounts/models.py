@@ -58,6 +58,19 @@ class Account(
             balance=models.Sum('transact_amount')
         )['balance'] or 0.0
 
+    def save(self, *args, **kwargs):
+        if (
+                self.is_sealed and
+                self.transactions.filter(
+                    transact_audited=False
+                ).exist()
+        ):
+            from rest_framework import exceptions
+            raise exceptions.PermissionDenied(
+                'can not seal account which has non-audited transaction')
+
+        return super().save(*args, **kwargs)
+
 
 class TransactionCategory(
     TrackableModelMixin,
@@ -70,6 +83,14 @@ class TransactionCategory(
     uuid = models.UUIDField(
         unique=True,
         default=uuid1,
+    )
+    club = models.ForeignKey(
+        'clubs.Club',
+        related_name='transaction_categories',
+        on_delete=models.PROTECT,
+        db_constraint=False,
+        null=True,
+        default=None,
     )
     name = models.CharField(
         unique=True,
@@ -121,6 +142,7 @@ class Transaction(
         default=False
     )
     transact_time = models.DateTimeField()
+
     # account info --------------------------
     # balance after transaction
     # account_balance = models.DecimalField(
@@ -129,3 +151,14 @@ class Transaction(
     #     null=True,
     #     default=None,
     # )
+
+    def save(self, *args, **kwargs):
+        if (
+                self.category and
+                self.category.club_id != self.account.club_id
+        ):
+            from rest_framework import exceptions
+            raise exceptions.PermissionDenied(
+                'can not set category belongs to other clubs')
+
+        return super().save(*args, **kwargs)
