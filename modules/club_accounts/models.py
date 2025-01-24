@@ -63,7 +63,7 @@ class Account(
                 self.is_sealed and
                 self.transactions.filter(
                     transact_audited=False
-                ).exist()
+                ).exists()
         ):
             from rest_framework import exceptions
             raise exceptions.PermissionDenied(

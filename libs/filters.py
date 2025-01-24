@@ -4,6 +4,12 @@ from django_filters.rest_framework import (
 )
 
 
+class DummyFilter(filters.CharFilter):
+
+    def filter(self, qs, value):
+        return qs  # do nothing
+
+
 class NullUUIDField(fields.UUIDField):
     def to_python(self, value):
         return None if value == 'null' else super().to_python(value)

@@ -8,21 +8,21 @@ from rest_framework import (
 )
 
 
-class AttendeeTest(test.APITestCase):
+class ParticipantTest(test.APITestCase):
     """
-    test for attendee
+    test for participants
     """
 
     fixtures = ['test_clubs.json', 'test_members.json']
 
     @unittest.mock.patch(
-        'modules.club_members.views.'
-        'AttendeeViewSet.permission_classes', [])
-    def test_create_attendee(self):
+        'modules.club_participants.views.'
+        'ParticipantViewSet.permission_classes', [])
+    def test_create_participant(self):
         req_url = reverse.reverse(
-            'club_members:member_attendees-list')
+            'club_participants:participants-list')
         req_data = {
-            'name': 'Test Attendee 1',
+            'name': 'Test Participant 1',
         }
         resp = self.client.post(
             req_url,

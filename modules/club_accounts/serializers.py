@@ -156,3 +156,11 @@ class TransactionSerializer(TrackableModelSerializer):
         validated_data.pop('account', None)
 
         return super().update(instance, validated_data)
+
+
+class TransactionStatisticSerializer(serializers.Serializer):
+    transact_date = serializers.DateField()
+    transact_amount = serializers.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+    )

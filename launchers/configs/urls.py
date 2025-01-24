@@ -35,7 +35,7 @@ urlpatterns = [
     path('api/admin/', admin.site.urls),
     path('api/drf/', include('rest_framework.urls')),
     path('api/', include('modules.club_accounts.urls')),
-    path('api/', include('modules.club_members.urls')),
+    path('api/', include('modules.club_participants.urls')),
     path('api/', include('modules.club_meetings.urls')),
     path('api/', include('modules.clubs.urls')),
     path('api/', include('modules.users.urls')),

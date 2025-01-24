@@ -3,6 +3,9 @@ from django_filters.rest_framework import (
     filterset,
 )
 
+from libs.filters import (
+    DummyFilter
+)
 from .models import (
     Account,
     TransactionCategory,
@@ -64,30 +67,40 @@ class TransactionFilterSet(filterset.FilterSet):
     account = filters.UUIDFilter(
         field_name='account__uuid',
     )
-    transact_amount__lte = filters.NumberFilter(
+    transact_amount_lt = filters.NumberFilter(
+        field_name='transact_amount',
+        lookup_expr='lt',
+    )
+    transact_amount_lte = filters.NumberFilter(
         field_name='transact_amount',
         lookup_expr='lte',
     )
-    transact_amount__gte = filters.NumberFilter(
+    transact_amount_gt = filters.NumberFilter(
+        field_name='transact_amount',
+        lookup_expr='gt',
+    )
+    transact_amount_gte = filters.NumberFilter(
         field_name='transact_amount',
         lookup_expr='gte',
     )
-    transact_time__lt = filters.IsoDateTimeFilter(
+    transact_time_lt = filters.IsoDateTimeFilter(
         field_name='transact_time',
         lookup_expr='lt',
     )
-    transact_time__lte = filters.IsoDateTimeFilter(
+    transact_time_lte = filters.IsoDateTimeFilter(
         field_name='transact_time',
         lookup_expr='lte',
     )
-    transact_time__gt = filters.IsoDateTimeFilter(
+    transact_time_gt = filters.IsoDateTimeFilter(
         field_name='transact_time',
         lookup_expr='gt',
     )
-    transact_time__gte = filters.IsoDateTimeFilter(
+    transact_time_gte = filters.IsoDateTimeFilter(
         field_name='transact_time',
         lookup_expr='gte',
     )
+    # for statistic api
+    transact_time_zone = DummyFilter()
 
     class Meta:
         model = Transaction
@@ -96,10 +109,13 @@ class TransactionFilterSet(filterset.FilterSet):
             'category',
             'account',
             'transact_audited',
-            'transact_amount__lte',
-            'transact_amount__gte',
-            'transact_time__lt',
-            'transact_time__lte',
-            'transact_time__gt',
-            'transact_time__gte',
+            'transact_amount_lt',
+            'transact_amount_lte',
+            'transact_amount_gt',
+            'transact_amount_gte',
+            'transact_time_lt',
+            'transact_time_lte',
+            'transact_time_gt',
+            'transact_time_gte',
+            'transact_time_zone',
         )

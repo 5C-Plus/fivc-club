@@ -77,7 +77,7 @@ class Meeting(
     )
     # meeting manager
     meeting_manager = models.ForeignKey(
-        'club_members.Attendee',
+        'club_participants.Participant',
         related_name='meetings',
         on_delete=models.PROTECT,
         db_constraint=False,
@@ -182,8 +182,8 @@ class MeetingRole(
     )
     # may be null which indicates that
     # the role has not been taken
-    attendee = models.ForeignKey(
-        'club_members.Attendee',
+    participant = models.ForeignKey(
+        'club_participants.Participant',
         related_name='meeting_roles',
         on_delete=models.PROTECT,
         db_constraint=False,

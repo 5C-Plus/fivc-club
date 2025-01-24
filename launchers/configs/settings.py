@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     'rest_framework',
 
     'modules.club_accounts',
-    'modules.club_members',
+    'modules.club_participants',
     'modules.club_meetings',
     'modules.clubs',
     'modules.users',

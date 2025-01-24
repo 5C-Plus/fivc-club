@@ -119,6 +119,7 @@ nohup.out
 .logs/
 .static/
 .tmp/
+.backup/
 .DS_Store
 env356
 

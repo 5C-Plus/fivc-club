@@ -6,9 +6,18 @@ from libs.viewsets.mixins import (
     ProtectedDestroyViewSetMixin,
 )
 
-from .filters import ClubFilterSet
-from .models import Club
-from .serializers import ClubSerializer
+from .filters import (
+    ClubFilterSet,
+    ProgramFilterSet
+)
+from .models import (
+    Club,
+    Program
+)
+from .serializers import (
+    ClubSerializer,
+    ProgramSerializer
+)
 
 
 class ClubViewSet(
@@ -27,3 +36,21 @@ class ClubViewSet(
         'modified_by',
     ).all()
     serializer_class = ClubSerializer
+
+
+class ProgramViewSet(
+    ProtectedCreateViewSetMixin,
+    ProtectedDestroyViewSetMixin,
+    viewsets.ModelViewSet,
+):
+    """
+    program view set
+    """
+    filterset_class = ProgramFilterSet
+    lookup_field = 'uuid'
+    permission_classes = (IsAdminOrReadOnly,)
+    queryset = Program.objects.select_related(
+        'created_by',
+        'modified_by',
+    ).all()
+    serializer_class = ProgramSerializer

@@ -92,6 +92,6 @@ class MeetingRoleViewSet(
         'modified_by',
         'meeting',
         'meeting_session',
-        'attendee',
+        'participant',
     )
     serializer_class = MeetingRoleSerializer

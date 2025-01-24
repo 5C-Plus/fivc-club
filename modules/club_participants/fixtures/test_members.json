@@ -1,6 +1,6 @@
 [
   {
-    "model": "club_members.Attendee",
+    "model": "club_participants.Participant",
     "pk": 100,
     "fields": {
       "uuid": "97ecc0aa-c6bc-11ef-a407-ba4b1618bd02",
@@ -11,7 +11,7 @@
     }
   },
   {
-    "model": "club_members.Attendee",
+    "model": "club_participants.Participant",
     "pk": 101,
     "fields": {
       "uuid": "2452b778-cd77-11ef-b9f8-ba4b1618bd02",
