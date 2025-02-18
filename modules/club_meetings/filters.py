@@ -8,6 +8,7 @@ from .models import (
     Meeting,
     MeetingRole,
     MeetingSession,
+    MeetingSessionRoleBinding,
 )
 
 
@@ -15,11 +16,17 @@ class MeetingVenueFilterSet(filterset.FilterSet):
     club = filters.UUIDFilter(
         field_name='club__uuid',
     )
+    address_contains = filters.CharFilter(
+        field_name='address',
+        lookup_expr='contains',
+    )
 
     class Meta:
         model = MeetingVenue
         fields = (
             'club',
+            'address',
+            'address_contains',
         )
 
 
@@ -31,20 +38,20 @@ class MeetingFilterSet(filterset.FilterSet):
         field_name='theme',
         lookup_expr='contains',
     )
-    date_lt = filters.DateFilter(
-        field_name='date',
+    time_lt = filters.IsoDateTimeFilter(
+        field_name='time',
         lookup_expr='lt',
     )
-    date_gt = filters.DateFilter(
-        field_name='date',
+    time_gt = filters.IsoDateTimeFilter(
+        field_name='time',
         lookup_expr='gt',
     )
-    date_lte = filters.DateFilter(
-        field_name='date',
+    time_lte = filters.IsoDateTimeFilter(
+        field_name='time',
         lookup_expr='lte',
     )
-    date_gte = filters.DateFilter(
-        field_name='date',
+    time_gte = filters.IsoDateTimeFilter(
+        field_name='time',
         lookup_expr='gte',
     )
 
@@ -54,10 +61,31 @@ class MeetingFilterSet(filterset.FilterSet):
             'club',
             'theme',
             'theme_contains',
-            'date_lt',
-            'date_lte',
-            'date_gt',
-            'date_gte',
+            'time_lt',
+            'time_lte',
+            'time_gt',
+            'time_gte',
+        )
+
+
+class MeetingRoleFilterSet(filterset.FilterSet):
+    meeting = filters.UUIDFilter(
+        field_name='meeting__uuid',
+    )
+    meeting_session = filters.UUIDFilter(
+        field_name='meeting_session_role_bindings__meeting_session__uuid',
+    )
+    meeting_session_exclude = filters.UUIDFilter(
+        field_name='meeting_session_role_bindings__meeting_session__uuid',
+        exclude=True,
+    )
+
+    class Meta:
+        model = MeetingRole
+        fields = (
+            'meeting',
+            'meeting_session',
+            'meeting_session_exclude',
         )
 
 
@@ -73,21 +101,21 @@ class MeetingSessionFilterSet(filterset.FilterSet):
         )
 
 
-class MeetingRoleFilterSet(filterset.FilterSet):
+class MeetingSessionRoleBindingFilterSet(filterset.FilterSet):
     meeting = filters.UUIDFilter(
-        field_name='meeting__uuid',
+        field_name='meeting_session__meeting__uuid',
+    )
+    meeting_role = filters.UUIDFilter(
+        field_name='meeting_role__uuid',
     )
     meeting_session = filters.UUIDFilter(
         field_name='meeting_session__uuid',
     )
-    meeting_session_isnull = filters.BooleanFilter(
-        field_name='meeting_session',
-        lookup_expr='isnull',
-    )
 
     class Meta:
-        model = MeetingRole
+        model = MeetingSessionRoleBinding
         fields = (
             'meeting',
+            'meeting_role',
             'meeting_session',
         )

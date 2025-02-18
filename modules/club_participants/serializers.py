@@ -24,17 +24,19 @@ class ParticipantSerializer(TrackableModelSerializer):
         )
 
     class TitleSerializer(serializers.Serializer):
-        uuid = serializers.UUIDField(
-            source='uuid',
+        uuid = serializers.UUIDField()
+        # program = serializers.UUIDField(
+        #     source='program.uuid',
+        # )
+        name = serializers.CharField(
+            source='program.name'
         )
-        name = serializers.SerializerMethodField()
-
-        @staticmethod
-        def get_name(instance):
-            if not instance.level:
-                return instance.program.name
-
-            return f'{instance.program.name}{str(instance.level)}'
+        alias = serializers.CharField(
+            source='program.alias',
+        )
+        level = serializers.IntegerField(
+            allow_null=True,
+        )
 
     clubs = ClubSerializer(
         source='members',
@@ -81,6 +83,10 @@ class ParticipantTitleSerializer(
         source='program.name',
         default='',
     )
+    program_alias = serializers.ReadOnlyField(
+        source='program.alias',
+        default='',
+    )
     participant = serializers.SlugRelatedField(
         slug_field='uuid',
         queryset=Participant.objects.all(),
@@ -100,6 +106,7 @@ class ParticipantTitleSerializer(
             'modified_time',
 
             'program_name',
+            'program_alias',
             'participant_name',
         )
         fields = (

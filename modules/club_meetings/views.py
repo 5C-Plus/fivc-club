@@ -9,20 +9,23 @@ from libs.viewsets.mixins import (
 from .filters import (
     MeetingVenueFilterSet,
     MeetingFilterSet,
-    MeetingSessionFilterSet,
     MeetingRoleFilterSet,
+    MeetingSessionFilterSet,
+    MeetingSessionRoleBindingFilterSet,
 )
 from .models import (
     MeetingVenue,
     Meeting,
-    MeetingSession,
     MeetingRole,
+    MeetingSession,
+    MeetingSessionRoleBinding,
 )
 from .serializers import (
     MeetingVenueSerializer,
     MeetingSerializer,
-    MeetingSessionSerializer,
     MeetingRoleSerializer,
+    MeetingSessionSerializer,
+    MeetingSessionRoleBindingSerializer,
 )
 
 
@@ -59,24 +62,8 @@ class MeetingViewSet(
         'club',
         'venue',
         'meeting_manager',
-    )
+    ).order_by('-time')
     serializer_class = MeetingSerializer
-
-
-class MeetingSessionViewSet(
-    ProtectedCreateViewSetMixin,
-    ProtectedDestroyViewSetMixin,
-    viewsets.ModelViewSet,
-):
-    filterset_class = MeetingSessionFilterSet
-    lookup_field = 'uuid'
-    permission_classes = (IsAdminOrReadOnly,)
-    queryset = MeetingSession.objects.select_related(
-        'created_by',
-        'modified_by',
-        'meeting',
-    )
-    serializer_class = MeetingSessionSerializer
 
 
 class MeetingRoleViewSet(
@@ -91,7 +78,46 @@ class MeetingRoleViewSet(
         'created_by',
         'modified_by',
         'meeting',
-        'meeting_session',
         'participant',
     )
     serializer_class = MeetingRoleSerializer
+
+
+class MeetingSessionViewSet(
+    ProtectedCreateViewSetMixin,
+    ProtectedDestroyViewSetMixin,
+    viewsets.ModelViewSet,
+):
+    filterset_class = MeetingSessionFilterSet
+    lookup_field = 'uuid'
+    permission_classes = (IsAdminOrReadOnly,)
+    queryset = MeetingSession.objects.select_related(
+        'created_by',
+        'modified_by',
+        'meeting',
+    ).prefetch_related(
+        'meeting_session_role_bindings',
+        'meeting_session_role_bindings__meeting_role__participant',
+    ).order_by('order')
+    serializer_class = MeetingSessionSerializer
+
+
+class MeetingSessionRoleBindingViewSet(
+    ProtectedCreateViewSetMixin,
+    ProtectedDestroyViewSetMixin,
+    viewsets.mixins.CreateModelMixin,
+    viewsets.mixins.DestroyModelMixin,
+    viewsets.mixins.RetrieveModelMixin,
+    viewsets.mixins.ListModelMixin,
+    viewsets.GenericViewSet,
+):
+    filterset_class = MeetingSessionRoleBindingFilterSet
+    lookup_field = 'uuid'
+    queryset = MeetingSessionRoleBinding.objects.select_related(
+        'created_by',
+        'meeting_session',
+        'meeting_role',
+        'meeting_role__participant',
+    ).all()
+    permission_classes = (IsAdminOrReadOnly,)
+    serializer_class = MeetingSessionRoleBindingSerializer

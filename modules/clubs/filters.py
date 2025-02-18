@@ -25,10 +25,16 @@ class ProgramFilterSet(filterset.FilterSet):
         field_name='name',
         lookup_expr='contains',
     )
+    alias_contains = filters.CharFilter(
+        field_name='alias',
+        lookup_expr='contains',
+    )
 
     class Meta:
         model = Program
         fields = (
             'name',
             'name_contains',
+            'alias',
+            'alias_contains',
         )

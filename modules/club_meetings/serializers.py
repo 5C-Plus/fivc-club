@@ -2,6 +2,7 @@ from django.apps import apps
 from rest_framework import serializers
 from libs.serializers import (
     TrackableModelSerializer,
+    TrackableCreateModelSerializer,
 )
 
 from .models import (
@@ -9,6 +10,7 @@ from .models import (
     Meeting,
     MeetingRole,
     MeetingSession,
+    MeetingSessionRoleBinding,
 )
 
 
@@ -37,7 +39,7 @@ class MeetingVenueSerializer(TrackableModelSerializer):
         fields = (
             'club',
             'address',
-            'extra',
+            'external',
             *read_only_fields,
         )
 
@@ -68,8 +70,8 @@ class MeetingSerializer(TrackableModelSerializer):
         source='venue.address',
         default='',
     )
-    venue_extra = serializers.ReadOnlyField(
-        source='venue.extra',
+    venue_external = serializers.ReadOnlyField(
+        source='venue.external',
         default=None,
     )
     meeting_manager = serializers.SlugRelatedField(
@@ -95,15 +97,14 @@ class MeetingSerializer(TrackableModelSerializer):
 
             'club_name',
             'venue_address',
-            'venue_extra',
+            'venue_external',
             'meeting_manager_name',
         )
         fields = (
             'club',
-            'date',
             'time',
             'theme',
-            'extra',
+            'notes',
             'venue',
             'meeting_manager',
             *read_only_fields,
@@ -117,9 +118,30 @@ class MeetingSerializer(TrackableModelSerializer):
 
 
 class MeetingSessionSerializer(TrackableModelSerializer):
+    class RoleSerializer(serializers.Serializer):
+        uuid = serializers.ReadOnlyField(
+            source='meeting_role.participant.uuid',
+        )
+        title = serializers.ReadOnlyField(
+            source='meeting_role.title',
+        )
+        name = serializers.ReadOnlyField(
+            source='meeting_role.participant.name',
+            default=None,
+        )
+        intro = serializers.ReadOnlyField(
+            source='meeting_role.participant.intro',
+            default=None,
+        )
+
     meeting = serializers.SlugRelatedField(
         slug_field='uuid',
         queryset=Meeting.objects.all(),
+    )
+    meeting_roles = RoleSerializer(
+        source='meeting_session_role_bindings',
+        many=True,
+        read_only=True,
     )
 
     class Meta:
@@ -130,12 +152,16 @@ class MeetingSessionSerializer(TrackableModelSerializer):
             'created_by',
             'modified_time',
             'modified_by',
+
+            'meeting_roles',
         )
         fields = (
             'meeting',
             'name',
             'order',
             'duration',
+            'notes',
+            'is_highlighted',
             *read_only_fields,
         )
 
@@ -150,10 +176,6 @@ class MeetingRoleSerializer(TrackableModelSerializer):
     meeting = serializers.SlugRelatedField(
         slug_field='uuid',
         queryset=Meeting.objects.all(),
-    )
-    meeting_session = serializers.SlugRelatedField(
-        slug_field='uuid',
-        queryset=MeetingSession.objects.all(),
     )
     participant = serializers.SlugRelatedField(
         slug_field='uuid',
@@ -180,8 +202,7 @@ class MeetingRoleSerializer(TrackableModelSerializer):
         )
         fields = (
             'meeting',
-            'meeting_session',
-            'type',
+            'title',
             'participant',
             *read_only_fields,
         )
@@ -189,6 +210,51 @@ class MeetingRoleSerializer(TrackableModelSerializer):
     def update(self, instance, validated_data):
         # can not change meeting and session
         validated_data.pop('meeting', None)
-        validated_data.pop('meeting_session', None)
+        # validated_data.pop('meeting_session', None)
 
         return super().update(instance, validated_data)
+
+
+class MeetingSessionRoleBindingSerializer(
+    TrackableCreateModelSerializer
+):
+    meeting_role = serializers.SlugRelatedField(
+        slug_field='uuid',
+        queryset=MeetingRole.objects.all(),
+    )
+    meeting_role_title = serializers.ReadOnlyField(
+        source='meeting_role.title',
+        default='',
+    )
+    meeting_role_participant_name = serializers.ReadOnlyField(
+        source='meeting_role.participant.name',
+        default='',
+    )
+    meeting_role_participant_intro = serializers.ReadOnlyField(
+        source='meeting_role.participant.intro',
+        default='',
+    )
+    meeting_session = serializers.SlugRelatedField(
+        slug_field='uuid',
+        queryset=MeetingSession.objects.all(),
+    )
+
+    class Meta:
+        model = MeetingSessionRoleBinding
+        read_only_fields = (
+            'uuid',
+            'created_time',
+            'created_by',
+
+            'meeting_role_title',
+            'meeting_role_participant_name',
+            'meeting_role_participant_intro',
+        )
+        fields = (
+            'meeting_role',
+            'meeting_session',
+            *read_only_fields,
+        )
+
+    def update(self, instance, validated_data):
+        raise AssertionError('not allowed to update')

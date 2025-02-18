@@ -4,7 +4,9 @@ from django.db import models
 
 from libs.models.mixins import (
     TrackableModelMixin,
+    TrackableCreatedModelMixin,
     VersionedModelMixin,
+    VersionedCreatedModelMixin,
 )
 
 
@@ -29,7 +31,8 @@ class MeetingVenue(
     address = models.TextField()
     # extra details redirect to external link
     # which might be a video
-    extra = models.URLField(
+    external = models.URLField(
+        max_length=4096,
         null=True,
         default=None,
     )
@@ -53,16 +56,14 @@ class Meeting(
         on_delete=models.PROTECT,
         db_constraint=False,
     )
-    # time = models.DateTimeField()
-    date = models.DateField()
-    time = models.TimeField()
+    time = models.DateTimeField()
     # meeting theme
     theme = models.TextField(
         blank=True,
         default='',
     )
-    # extra info such as highlights and WOD
-    extra = models.TextField(
+    # notes such as highlights and WOD
+    notes = models.TextField(
         blank=True,
         default='',
     )
@@ -84,11 +85,6 @@ class Meeting(
         null=True,
         default=None,
     )
-
-    class Meta:
-        unique_together = [
-            ('club', 'date')  # one at most a day
-        ]
 
     def save(self, *args, **kwargs):
         if (
@@ -127,7 +123,17 @@ class MeetingSession(
     # session order in the meeting
     order = models.FloatField()
     # duration time of this session
+    # if duration is 0 make it as a wrap-up session
     duration = models.DurationField()
+    # notes such as highlights and WOD
+    notes = models.TextField(
+        blank=True,
+        default='',
+    )
+    # if is highlighted
+    is_highlighted = models.BooleanField(
+        default=False,
+    )
 
 
 class MeetingRole(
@@ -148,37 +154,10 @@ class MeetingRole(
         on_delete=models.PROTECT,
         db_constraint=False,
     )
-    meeting_session = models.ForeignKey(
-        MeetingSession,
-        related_name='meeting_roles',
-        on_delete=models.CASCADE,
-        db_constraint=False,
-        null=True,
-        default=None,
-    )
-    type_enum = {
-        # regular roles -------------------
-        'TME': 'Toastmaster Of the Evening',
-        'TMD': 'Toastmaster Of the Day',
-        'TTM': 'Table Topics Master',
-        'IE': 'Individual Evaluator',
-        'GE': 'General Evaluator',
-        'Timer': 'Timer',
-        'AhCounter': 'Ah Counter',
-        'Grammarian': 'Grammarian',
-        'Photographer': 'Photographer',
-        'ItSupport': 'IT Support',
-
-        # special roles -------------------
-        'SharingMaster': 'Sharing Master',
-        'ContestChair': 'Contest Chair',
-        'ElectionChair': 'Election Chair',
-        'BallotCounter': 'Ballot Counter',
-        'SAA': 'Sergeant At Arms',
-    }
-    type = models.CharField(
-        max_length=32,
-        choices=list(type_enum.items()),
+    title = models.CharField(
+        max_length=64,
+        default='',
+        blank=True,
     )
     # may be null which indicates that
     # the role has not been taken
@@ -191,13 +170,45 @@ class MeetingRole(
         default=None,
     )
 
+
+class MeetingSessionRoleBinding(
+    TrackableCreatedModelMixin,
+    VersionedCreatedModelMixin,
+    models.Model,
+):
+    """
+    meeting role and session binding
+    """
+    uuid = models.UUIDField(
+        unique=True,
+        default=uuid1,
+    )
+    meeting_role = models.ForeignKey(
+        MeetingRole,
+        related_name='meeting_session_role_bindings',
+        on_delete=models.CASCADE,
+        db_constraint=False,
+    )
+    meeting_session = models.ForeignKey(
+        MeetingSession,
+        related_name='meeting_session_role_bindings',
+        on_delete=models.CASCADE,
+        db_constraint=False,
+    )
+
+    class Meta:
+        unique_together = [
+            ('meeting_role', 'meeting_session'),
+        ]
+
     def save(self, *args, **kwargs):
         if (
-                self.meeting_session and
-                self.meeting_session.meeting_id != self.meeting_id
+            self.meeting_role.meeting_id !=
+            self.meeting_session.meeting_id
         ):
             from rest_framework import exceptions
             raise exceptions.PermissionDenied(
-                'can not set role belongs to other meeting')
+                'can not bind role and session '
+                'which belong to different meeting')
 
         return super().save(*args, **kwargs)

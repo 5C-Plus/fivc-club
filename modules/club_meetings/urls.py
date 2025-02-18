@@ -4,8 +4,9 @@ from libs.routers import DefaultRouter
 from .views import (
     MeetingVenueViewSet,
     MeetingViewSet,
-    MeetingSessionViewSet,
     MeetingRoleViewSet,
+    MeetingSessionViewSet,
+    MeetingSessionRoleBindingViewSet,
 )
 
 app_name = 'club_meetings'
@@ -17,14 +18,19 @@ router.register(
     basename='meeting_venues',
 )
 router.register(
+    'meetings/roles',
+    MeetingRoleViewSet,
+    basename='meeting_roles',
+)
+router.register(
     'meetings/sessions',
     MeetingSessionViewSet,
     basename='meeting_sessions',
 )
 router.register(
-    'meetings/roles',
-    MeetingRoleViewSet,
-    basename='meeting_roles',
+    'meetings/session-role-bindings',
+    MeetingSessionRoleBindingViewSet,
+    basename='meeting_session_role_bindings',
 )
 router.register(
     'meetings',
