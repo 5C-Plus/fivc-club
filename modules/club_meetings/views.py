@@ -79,6 +79,11 @@ class MeetingRoleViewSet(
         'modified_by',
         'meeting',
         'participant',
+    ).prefetch_related(
+        'participant__participant_titles',
+        'participant__participant_titles__program',
+        'participant__members',
+        'participant__members__club',
     )
     serializer_class = MeetingRoleSerializer
 

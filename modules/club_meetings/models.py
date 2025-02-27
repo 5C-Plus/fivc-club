@@ -57,6 +57,12 @@ class Meeting(
         db_constraint=False,
     )
     time = models.DateTimeField()
+    # name of the meeting
+    name = models.CharField(
+        max_length=64,
+        blank=True,
+        default='',
+    )
     # meeting theme
     theme = models.TextField(
         blank=True,
@@ -85,6 +91,11 @@ class Meeting(
         null=True,
         default=None,
     )
+
+    class Meta:
+        unique_together = [
+            ('club', 'name')
+        ]
 
     def save(self, *args, **kwargs):
         if (

@@ -103,6 +103,7 @@ class MeetingSerializer(TrackableModelSerializer):
         fields = (
             'club',
             'time',
+            'name',
             'theme',
             'notes',
             'venue',
@@ -120,23 +121,30 @@ class MeetingSerializer(TrackableModelSerializer):
 class MeetingSessionSerializer(TrackableModelSerializer):
     class RoleSerializer(serializers.Serializer):
         uuid = serializers.ReadOnlyField(
-            source='meeting_role.participant.uuid',
+            source='meeting_role.uuid',
         )
         title = serializers.ReadOnlyField(
             source='meeting_role.title',
         )
-        name = serializers.ReadOnlyField(
+        participant = serializers.ReadOnlyField(
+            source='meeting_role.participant.uuid'
+        )
+        participant_name = serializers.ReadOnlyField(
             source='meeting_role.participant.name',
             default=None,
         )
-        intro = serializers.ReadOnlyField(
-            source='meeting_role.participant.intro',
-            default=None,
-        )
+        # participant_intro = serializers.ReadOnlyField(
+        #     source='meeting_role.participant.intro',
+        #     default='',
+        # )
 
     meeting = serializers.SlugRelatedField(
         slug_field='uuid',
         queryset=Meeting.objects.all(),
+    )
+    meeting_time = serializers.ReadOnlyField(
+        source='meeting.time',
+        read_only=True,
     )
     meeting_roles = RoleSerializer(
         source='meeting_session_role_bindings',
@@ -153,6 +161,7 @@ class MeetingSessionSerializer(TrackableModelSerializer):
             'modified_time',
             'modified_by',
 
+            'meeting_time',
             'meeting_roles',
         )
         fields = (
@@ -173,6 +182,29 @@ class MeetingSessionSerializer(TrackableModelSerializer):
 
 
 class MeetingRoleSerializer(TrackableModelSerializer):
+    class ClubSerializer(serializers.Serializer):
+        uuid = serializers.UUIDField(
+            source='club.uuid',
+        )
+        name = serializers.CharField(
+            source='club.name',
+        )
+        alias = serializers.CharField(
+            source='club.alias',
+        )
+
+    class TitleSerializer(serializers.Serializer):
+        uuid = serializers.UUIDField()
+        name = serializers.CharField(
+            source='program.name'
+        )
+        alias = serializers.CharField(
+            source='program.alias',
+        )
+        level = serializers.IntegerField(
+            allow_null=True,
+        )
+
     meeting = serializers.SlugRelatedField(
         slug_field='uuid',
         queryset=Meeting.objects.all(),
@@ -188,6 +220,19 @@ class MeetingRoleSerializer(TrackableModelSerializer):
         source='participant.name',
         default='',
     )
+    participant_titles = TitleSerializer(
+        source='participant.participant_titles',
+        many=True,
+        read_only=True,
+    )
+    participant_clubs = ClubSerializer(
+        source='participant.members',
+        many=True,
+        read_only=True,
+    )
+    participant_intro = serializers.ReadOnlyField(
+        source='participant.intro',
+    )
 
     class Meta:
         model = MeetingRole
@@ -199,6 +244,9 @@ class MeetingRoleSerializer(TrackableModelSerializer):
             'modified_by',
 
             'participant_name',
+            'participant_titles',
+            'participant_clubs',
+            'participant_intro',
         )
         fields = (
             'meeting',
