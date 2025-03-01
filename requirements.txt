@@ -14,8 +14,8 @@ django-filter~=24.0
 # drf-nested-routers==0.93.3
 drf-yasg~=1.21.0
 fivc~=0.0
-# gevent==23.7.0
-# gunicorn==20.1.0
+gevent=~24.0.0
+gunicorn=~23.0.0
 # jinja2==3.0.3
 # openpyxl==3.0.9
 Pillow~=11.0.0
