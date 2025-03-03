@@ -1,0 +1,1 @@
+import{R as s}from"./index-c922549f.js";const r=()=>s.get({url:"/user/loginOut"}),a=({params:r})=>s.get({url:"/user/list",params:r}),t=r=>s.get({url:"/role/list",params:r});export{t as a,a as g,r as l};
