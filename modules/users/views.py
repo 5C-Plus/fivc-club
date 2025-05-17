@@ -8,11 +8,16 @@ from rest_framework import (
     exceptions,
     response,
     views,
+    viewsets,
 )
 
 from .serializers import (
     UserLoginSerializer,
     UserSelfSerializer,
+    UserPreferenceSerializer,
+)
+from .models import (
+    UserPreference,
 )
 
 
@@ -90,3 +95,59 @@ class UserSelfView(views.APIView):
             context=self.get_renderer_context()
         )
         return response.Response(ser.data)
+
+
+class UserPreferenceView(views.APIView):
+    """
+    user preference api
+    """
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+
+        if not user.is_authenticated:
+            raise exceptions.NotAuthenticated('anonymous user')
+
+        instance, _ = UserPreference.objects.get_or_create(
+            user=user,
+            defaults={},
+        )
+        ser = UserPreferenceSerializer(
+            instance=instance,
+            context=self.get_renderer_context()
+        )
+        return response.Response(ser.data)
+
+    def patch(self, request, *args, **kwargs):
+        user = request.user
+
+        if not user.is_authenticated:
+            raise exceptions.NotAuthenticated('anonymous user')
+
+        instance, _ = UserPreference.objects.get_or_create(
+            user=user,
+            defaults={},
+        )
+        ser = UserPreferenceSerializer(
+            instance=instance,
+            data=request.data,
+            context=self.get_renderer_context(),
+            partial=True,
+        )
+        ser.is_valid(raise_exception=True)
+        ser.save()
+        return response.Response(ser.data)
+
+
+class UserPreferenceViewSet(viewsets.ModelViewSet):
+
+    lookup_field = 'uuid'
+    queryset = UserPreference.objects.select_related(
+        'user',
+    ).all()
+    serializer_class = UserPreferenceSerializer
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        qs = qs.filter(user__username=self.request.user.username)
+        return qs
