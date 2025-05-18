@@ -23,6 +23,9 @@ class ParticipantSerializer(TrackableModelSerializer):
             source='club.alias',
         )
 
+        class Meta:
+            ref_name = 'ParticipantClubBrief'  # Nested club serializer in Participant
+
     class TitleSerializer(serializers.Serializer):
         uuid = serializers.UUIDField()
         # program = serializers.UUIDField(
@@ -37,6 +40,9 @@ class ParticipantSerializer(TrackableModelSerializer):
         level = serializers.IntegerField(
             allow_null=True,
         )
+
+        class Meta:
+            ref_name = 'ParticipantTitleBrief'
 
     clubs = ClubSerializer(
         source='members',
