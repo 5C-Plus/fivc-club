@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'modules.club_participants',
     'modules.club_meetings',
     'modules.clubs',
+    'modules.user_socials',
     'modules.users',
 ]
 
@@ -179,3 +180,7 @@ SWAGGER_SETTINGS = {
     'LOGIN_URL': '/api/drf/login/',
     'LOGOUT_URL': '/api/drf/logout/',
 }
+
+# 微信公众号配置
+WECHAT_APP_ID = 'your_app_id'
+WECHAT_APP_SECRET = 'your_app_secret'
