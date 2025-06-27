@@ -1,9 +1,16 @@
+import random
+import time
+
 from django.contrib.auth import (
     authenticate,
     login,
     logout,
 )
-# from django.views.decorators import csrf
+from django.db import (
+    transaction,
+    IntegrityError,
+    OperationalError,
+)
 from rest_framework import (
     exceptions,
     response,
@@ -19,6 +26,23 @@ from .serializers import (
 from .models import (
     UserPreference,
 )
+
+
+def retry_db_operation(func, max_retries=3, base_delay=0.1):
+    """
+    Retry database operations that might fail due to locking
+    """
+    for attempt in range(max_retries):
+        try:
+            return func()
+        except (OperationalError, IntegrityError) as e:
+            if 'database is locked' in str(
+                    e).lower() and attempt < max_retries - 1:
+                # Exponential backoff with jitter
+                delay = base_delay * (2 ** attempt) + random.uniform(0, 0.1)
+                time.sleep(delay)
+                continue
+            raise e
 
 
 class UserLoginView(views.APIView):
@@ -108,15 +132,21 @@ class UserPreferenceView(views.APIView):
         if not user.is_authenticated:
             raise exceptions.NotAuthenticated('anonymous user')
 
-        instance, _ = UserPreference.objects.get_or_create(
-            user=user,
-            defaults={},
-        )
-        ser = UserPreferenceSerializer(
-            instance=instance,
-            context=self.get_renderer_context()
-        )
-        return response.Response(ser.data)
+        def _get_preference():
+            with transaction.atomic():
+                instance, _ = UserPreference.objects.get_or_create(
+                    user=user,
+                    defaults={},
+                )
+                ser = UserPreferenceSerializer(
+                    instance=instance,
+                    context=self.get_renderer_context()
+                )
+                return ser.data
+
+        # Retry the operation if database is locked
+        data = retry_db_operation(_get_preference)
+        return response.Response(data)
 
     def patch(self, request, *args, **kwargs):
         user = request.user
@@ -124,19 +154,27 @@ class UserPreferenceView(views.APIView):
         if not user.is_authenticated:
             raise exceptions.NotAuthenticated('anonymous user')
 
-        instance, _ = UserPreference.objects.get_or_create(
-            user=user,
-            defaults={},
-        )
-        ser = UserPreferenceSerializer(
-            instance=instance,
-            data=request.data,
-            context=self.get_renderer_context(),
-            partial=True,
-        )
-        ser.is_valid(raise_exception=True)
-        ser.save()
-        return response.Response(ser.data)
+        def _update_preference():
+            with transaction.atomic():
+                # Use get_or_create with proper error handling
+                instance, created = UserPreference.objects.get_or_create(
+                    user=user,
+                    defaults={}
+                )
+
+                ser = UserPreferenceSerializer(
+                    instance=instance,
+                    data=request.data,
+                    context=self.get_renderer_context(),
+                    partial=True,
+                )
+                ser.is_valid(raise_exception=True)
+                ser.save()
+                return ser.data
+
+        # Retry the operation if database is locked
+        data = retry_db_operation(_update_preference)
+        return response.Response(data)
 
 
 class UserPreferenceViewSet(viewsets.ModelViewSet):
