@@ -194,7 +194,8 @@ class MeetingRoleSerializer(TrackableModelSerializer):
         )
 
         class Meta:
-            ref_name = 'MeetingRoleClubBrief'  # Nested club serializer in MeetingRole
+            # Nested club serializer in MeetingRole
+            ref_name = 'MeetingRoleClubBrief'
 
     class TitleSerializer(serializers.Serializer):
         uuid = serializers.UUIDField()
@@ -209,7 +210,8 @@ class MeetingRoleSerializer(TrackableModelSerializer):
         )
 
         class Meta:
-            ref_name = 'MeetingRoleTitleBrief'  # Nested title serializer in MeetingRole
+            # Nested title serializer in MeetingRole
+            ref_name = 'MeetingRoleTitleBrief'
 
     meeting = serializers.SlugRelatedField(
         slug_field='uuid',

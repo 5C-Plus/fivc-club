@@ -5,6 +5,8 @@ from .views import (
     UserLogoutView,
     UserSelfView,
     UserPreferenceView,
+    UserChangePasswordView,
+    UserSetPasswordView,
 )
 
 app_name = 'users'
@@ -29,5 +31,15 @@ urlpatterns = [
         'users/preference/',
         UserPreferenceView.as_view(),
         name='preference'
+    ),
+    path(
+        'users/change-password/',
+        UserChangePasswordView.as_view(),
+        name='change-password'
+    ),
+    path(
+        'users/<str:username>/set-password/',
+        UserSetPasswordView.as_view(),
+        name='set-password'
     ),
 ]

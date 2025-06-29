@@ -24,7 +24,8 @@ class ParticipantSerializer(TrackableModelSerializer):
         )
 
         class Meta:
-            ref_name = 'ParticipantClubBrief'  # Nested club serializer in Participant
+            # Nested club serializer in Participant
+            ref_name = 'ParticipantClubBrief'
 
     class TitleSerializer(serializers.Serializer):
         uuid = serializers.UUIDField()

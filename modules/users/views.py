@@ -5,6 +5,7 @@ from django.contrib.auth import (
     authenticate,
     login,
     logout,
+    get_user_model,
 )
 from django.db import (
     transaction,
@@ -21,7 +22,10 @@ from rest_framework import (
 from .serializers import (
     UserLoginSerializer,
     UserSelfSerializer,
+    UserSelfUpdateSerializer,
     UserPreferenceSerializer,
+    UserChangePasswordSerializer,
+    UserSetPasswordSerializer,
 )
 from .models import (
     UserPreference,
@@ -99,6 +103,7 @@ class UserSelfView(views.APIView):
     """
     user self api
     """
+    permission_classes = ()  # 在视图内部进行认证检查
 
     def get(self, request, *args, **kwargs):
         user = request.user
@@ -119,6 +124,36 @@ class UserSelfView(views.APIView):
             context=self.get_renderer_context()
         )
         return response.Response(ser.data)
+
+    def patch(self, request, *args, **kwargs):
+        user = request.user
+
+        if not user.is_authenticated:
+            raise exceptions.NotAuthenticated('anonymous user')
+
+        ser = UserSelfUpdateSerializer(
+            instance=user,
+            data=request.data,
+            context=self.get_renderer_context(),
+            partial=True
+        )
+        ser.is_valid(raise_exception=True)
+        updated_user = ser.save()
+
+        # 返回更新后的用户信息
+        response_ser = UserSelfSerializer(
+            instance={
+                'username': updated_user.username,
+                'email': updated_user.email,
+                'first_name': updated_user.first_name,
+                'last_name': updated_user.last_name,
+                'is_staff': updated_user.is_staff,
+                'is_active': updated_user.is_active,
+                'date_joined': updated_user.date_joined,
+            },
+            context=self.get_renderer_context()
+        )
+        return response.Response(response_ser.data)
 
 
 class UserPreferenceView(views.APIView):
@@ -177,6 +212,28 @@ class UserPreferenceView(views.APIView):
         return response.Response(data)
 
 
+class UserChangePasswordView(views.APIView):
+    """
+    用户修改密码API
+    """
+    permission_classes = ()  # 在视图内部进行认证检查
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+
+        if not user.is_authenticated:
+            raise exceptions.NotAuthenticated('anonymous user')
+
+        ser = UserChangePasswordSerializer(
+            data=request.data,
+            context=self.get_renderer_context()
+        )
+        ser.is_valid(raise_exception=True)
+        result = ser.save()
+
+        return response.Response(result)
+
+
 class UserPreferenceViewSet(viewsets.ModelViewSet):
 
     lookup_field = 'uuid'
@@ -189,3 +246,38 @@ class UserPreferenceViewSet(viewsets.ModelViewSet):
         qs = super().get_queryset()
         qs = qs.filter(user__username=self.request.user.username)
         return qs
+
+
+class UserSetPasswordView(views.APIView):
+    """
+    管理员设置用户密码API
+    """
+    permission_classes = ()  # 在视图内部进行认证检查
+
+    def post(self, request, username, *args, **kwargs):
+        user = request.user
+
+        if not user.is_authenticated:
+            raise exceptions.NotAuthenticated('anonymous user')
+
+        if not user.is_staff:
+            raise exceptions.PermissionDenied('只有管理员可以设置用户密码')
+
+        # 获取目标用户
+        User = get_user_model()
+        try:
+            target_user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise exceptions.NotFound(f'用户 {username} 不存在')
+
+        ser = UserSetPasswordSerializer(
+            data=request.data,
+            context={
+                **self.get_renderer_context(),
+                'target_user': target_user
+            }
+        )
+        ser.is_valid(raise_exception=True)
+        result = ser.save()
+
+        return response.Response(result)
