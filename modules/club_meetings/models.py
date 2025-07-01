@@ -108,6 +108,60 @@ class Meeting(
 
         return super().save(*args, **kwargs)
 
+    def clone(self, **kwargs):
+        init_kwargs = {
+            'time': self.time,
+            'name': self.name,
+            'theme': self.theme,
+            'notes': self.notes,
+            'venue': self.venue,
+            'meeting_manager': self.meeting_manager,
+        }
+        for k, v in init_kwargs.items():
+            if k in kwargs:
+                init_kwargs[k] = kwargs[k]
+
+        instance = self.__class__(
+            uuid=uuid1(),
+            club=self.club,
+            **init_kwargs,
+        )
+        instance.save()
+
+        # clone meeting sessions
+        session_old_2_new = {}
+        for session_old in self.meeting_sessions.all():
+            session_new = session_old.clone(meeting=instance)
+            session_old_2_new[session_old.id] = session_new.id
+
+        # clone meeting roles
+        role_old_2_new = {}
+        for role_old in self.meeting_roles.all():
+            role_new = role_old.clone(meeting=instance)
+            role_old_2_new[role_old.id] = role_new.id
+
+        # clone meeting session role bindings
+        binding_cls = MeetingSessionRoleBinding
+        binding_new = []
+        for binding_old in binding_cls.objects.filter(
+            meeting_session__meeting=self,
+            meeting_role__meeting=self,
+        ).distinct():
+            binding_session_new = session_old_2_new.get(
+                binding_old.meeting_session_id
+            )
+            binding_role_new = role_old_2_new.get(
+                binding_old.meeting_role_id
+            )
+            binding_new.append(binding_cls(
+                uuid=uuid1(),
+                meeting_role_id=binding_role_new,
+                meeting_session_id=binding_session_new,
+            ))
+        binding_cls.objects.bulk_create(binding_new)
+
+        return instance
+
 
 class MeetingSession(
     TrackableModelMixin,
@@ -146,6 +200,26 @@ class MeetingSession(
         default=False,
     )
 
+    def clone(self, **kwargs):
+        init_kwargs = {
+            'name': self.name,
+            'order': self.order,
+            'duration': self.duration,
+            'notes': self.notes,
+            'is_highlighted': self.is_highlighted,
+            'meeting': self.meeting,
+        }
+        for k, v in init_kwargs.items():
+            if k in kwargs:
+                init_kwargs[k] = kwargs[k]
+
+        instance = self.__class__(
+            uuid=uuid1(),
+            **init_kwargs,
+        )
+        instance.save()
+        return instance
+
 
 class MeetingRole(
     TrackableModelMixin,
@@ -180,6 +254,23 @@ class MeetingRole(
         null=True,
         default=None,
     )
+
+    def clone(self, **kwargs):
+        init_kwargs = {
+            'title': self.title,
+            'participant': self.participant,
+            'meeting': self.meeting,
+        }
+        for k, v in init_kwargs.items():
+            if k in kwargs:
+                init_kwargs[k] = kwargs[k]
+
+        instance = self.__class__(
+            uuid=uuid1(),
+            **init_kwargs
+        )
+        instance.save()
+        return instance
 
 
 class MeetingSessionRoleBinding(

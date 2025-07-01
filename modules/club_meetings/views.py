@@ -1,4 +1,8 @@
-from rest_framework import viewsets
+from rest_framework import (
+    decorators,
+    response,
+    viewsets,
+)
 
 from libs.permissions import IsAdminOrReadOnly
 from libs.viewsets.mixins import (
@@ -64,6 +68,30 @@ class MeetingViewSet(
         'meeting_manager',
     ).order_by('-time')
     serializer_class = MeetingSerializer
+
+    @decorators.action(
+        methods=['POST'],
+        detail=True,
+        serializer_class=MeetingSerializer,
+    )
+    def clone(self, request, *args, **kwargs):
+        instance = self.get_object()
+        ser = self.get_serializer(
+            instance=instance,
+            data=request.data,
+            context=self.get_renderer_context(),
+            partial=True,
+        )
+        ser.is_valid(raise_exception=True)
+
+        instance_new = instance.clone(
+            **ser.validated_data
+        )
+        ser = self.get_serializer(
+            instance=instance_new,
+            context=self.get_renderer_context()
+        )
+        return response.Response(ser.data)
 
 
 class MeetingRoleViewSet(
